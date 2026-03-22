@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique user ID" },
+        "displayName": { "type": "string", "description": "User's display name" },
+        "email": { "type": "string", "description": "User's email address" },
+        "photoURL": { "type": "string", "description": "User's profile picture URL" },
+        "status": { "type": "string", "description": "User's online status", "enum": ["online", "offline"] },
+        "lastSeen": { "type": "string", "format": "date-time", "description": "Last time the user was active" },
+        "publicKey": { "type": "string", "description": "User's public encryption key (JWK format)" }
+      },
+      "required": ["uid", "displayName", "email"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "A chat session between users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique chat ID" },
+        "type": { "type": "string", "enum": ["one-to-one", "group"], "description": "Type of chat" },
+        "participants": { "type": "array", "items": { "type": "string" }, "description": "List of user UIDs in the chat" },
+        "lastMessage": { "type": "object", "description": "The last message sent in this chat" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last time the chat was updated" },
+        "name": { "type": "string", "description": "Group name (if group chat)" },
+        "groupKey": { "type": "object", "description": "Encrypted group keys for each participant" }
+      },
+      "required": ["id", "type", "participants"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A single message in a chat",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique message ID" },
+        "chatId": { "type": "string", "description": "ID of the chat this message belongs to" },
+        "senderId": { "type": "string", "description": "UID of the sender" },
+        "text": { "type": "string", "description": "Message content (plain text for legacy, or null if encrypted)" },
+        "encryptedData": { "type": "string", "description": "Base64 encoded encrypted message data" },
+        "iv": { "type": "string", "description": "Initialization vector for AES encryption" },
+        "mediaUrl": { "type": "string", "description": "URL of shared media" },
+        "mediaType": { "type": "string", "enum": ["image", "video"], "description": "Type of shared media" },
+        "status": { "type": "string", "enum": ["sent", "delivered", "read"], "description": "Message status" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the message was sent" },
+        "reactions": { "type": "object", "description": "Emoji reactions to the message" }
+      },
+      "required": ["id", "chatId", "senderId", "createdAt"]
+    },
+    "ScheduledMessage": {
+      "title": "ScheduledMessage",
+      "description": "A message scheduled to be sent in the future",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique scheduled message ID" },
+        "chatId": { "type": "string", "description": "ID of the chat this message belongs to" },
+        "senderId": { "type": "string", "description": "UID of the sender" },
+        "text": { "type": "string", "description": "Message content" },
+        "scheduledAt": { "type": "string", "format": "date-time", "description": "When the message should be sent" },
+        "status": { "type": "string", "enum": ["pending", "sent", "failed"], "description": "Status of the scheduled message" }
+      },
+      "required": ["id", "chatId", "senderId", "scheduledAt", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "User profile storage" },
+    "/chats/{chatId}": { "schema": "Chat", "description": "Chat metadata storage" },
+    "/chats/{chatId}/messages/{messageId}": { "schema": "Message", "description": "Messages within a specific chat" },
+    "/scheduledMessages/{messageId}": { "schema": "ScheduledMessage", "description": "Global storage for scheduled messages" }
+  }
+}

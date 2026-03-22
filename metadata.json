@@ -1,0 +1,5 @@
+{
+  "name": "kai",
+  "description": "A scalable real-time chat application with one-to-one and group messaging, status indicators, and media sharing.",
+  "requestFramePermissions": ["camera", "microphone", "geolocation"]
+}
